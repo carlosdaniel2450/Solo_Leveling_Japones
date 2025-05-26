@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards de Japonês - Solo Leveling</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .flashcard-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #6A5ACD;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(106, 90, 205, 0.5);
+            text-align: center;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 10;
+        }
+
+        .flashcard-container[style*="block"] {
+            opacity: 1;
+        }
+
+        .flashcard-container h2 {
+            color: #6A5ACD;
+            margin-bottom: 20px;
+            font-size: clamp(1.5rem, 5vw, 1.8rem);
+        }
+
+        .flashcard {
+            perspective: 1000px;
+            margin: 15px auto;
+            width: 100%;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background: #333;
+            border: 3px solid #6A5ACD;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            box-sizing: border-box;
+            overflow: auto;
+        }
+
+        .card-front {
+            font-size: clamp(1rem, 3.5vw, 1.2rem);
+            color: #fff;
+        }
+
+        .card-front ruby {
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+
+        .card-front rt {
+            font-size: clamp(0.5rem, 2vw, 0.6rem);
+            color: #6A5ACD;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            font-size: clamp(0.7rem, 3vw, 0.8rem);
+            text-align: left;
+            color: #fff;
+            padding: 10px;
+        }
+
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .controls {
+            margin: 15px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .controls button, .difficulty-buttons button {
+            padding: 8px 16px;
+            background: #6A5ACD;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+        }
+
+        .controls button:hover, .difficulty-buttons button:hover {
+            background: #483D8B;
+            transform: scale(1.05);
+        }
+
+        .difficulty-buttons button:active {
+            animation: pulse 0.2s ease-in-out;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .form-container {
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #6A5ACD;
+        }
+
+        .form-container label {
+            display: block;
+            margin: 8px 0 4px;
+            color: #6A5ACD;
+            font-weight: bold;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+        }
+
+        .form-container input, .form-container textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #6A5ACD;
+            border-radius: 5px;
+            background: #333;
+            color: #fff;
+            font-size: clamp(0.7rem, 3vw, 0.8rem);
+            box-sizing: border-box;
+        }
+
+        .form-container input::placeholder, .form-container textarea::placeholder {
+            color: #999;
+        }
+
+        .import-export {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .srs-info {
+            margin: 8px 0;
+            color: #6A5ACD;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+        }
+
+        .nav-buttons {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: #6A5ACD;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+            width: 100%;
+        }
+
+        .nav-btn:hover {
+            background: #483D8B;
+            transform: scale(1.05);
+        }
+
+        .success, .error {
+            margin: 8px 0;
+            font-size: clamp(0.7rem, 3vw, 0.8rem);
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        .success {
+            color: #6A5ACD;
+        }
+
+        .error {
+            color: red;
+        }
+
+        /* NOVO: Efeito de partículas */
+        .particles {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #6A5ACD;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle 1s ease-out forwards;
+        }
+
+        @keyframes particle {
+            0% { transform: translate(0, 0); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)); opacity: 0; }
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            .flashcard-container {
+                padding: 15px;
+            }
+
+            .flashcard {
+                height: 150px;
+            }
+
+            .card-front {
+                font-size: clamp(0.9rem, 3vw, 1rem);
+            }
+
+            .card-back {
+                font-size: clamp(0.6rem, 2.5vw, 0.7rem);
+            }
+
+            .controls, .difficulty-buttons, .import-export, .nav-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .controls button, .difficulty-buttons button, .nav-btn {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="flashcard-container" id="flashcard-container">
+        <h2>Flashcards de Japonês</h2>
+        <div class="srs-info">Próxima revisão: <span id="next-review">N/A</span></div>
+        <div class="flashcard" id="flashcard">
+            <div class="card-inner">
+                <div class="card-front">
+                    <p id="front-text">Clique para começar</p>
+                </div>
+                <div class="card-back">
+                    <p id="romaji"></p>
+                    <p id="translation"></p>
+                    <p id="grammar"></p>
+                    <p id="vocabulary"></p>
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="prev-btn">Anterior</button>
+            <button id="flip-btn">Virar</button>
+            <button id="next-btn">Próximo</button>
+            <button id="delete-btn">Apagar</button>
+            <div class="difficulty-buttons">
+                <button id="easy-btn">Fácil</button>
+                <button id="medium-btn">Médio</button>
+                <button id="hard-btn">Difícil</button>
+            </div>
+        </div>
+        <div class="form-container">
+            <h3>Adicionar Novo Flashcard</h3>
+            <form id="flashcard-form">
+                <label>Frase em Japonês (com Kanji):</label>
+                <input type="text" id="phrase" placeholder="例: 私は毎日日本語を勉強します。" required>
+                <label>Furigana (opcional, formato: 漢字[ふりがな]):</label>
+                <input type="text" id="furigana" placeholder="例: 日本語[にほんご], 勉強[べんきょう]">
+                <label>Romaji:</label>
+                <input type="text" id="romaji-input" placeholder="例: Watashi wa mainichi nihongo o benkyou shimasu." required>
+                <label>Tradução (Português):</label>
+                <input type="text" id="translation-input" placeholder="Eu estudo japonês todos os dias." required>
+                <label>Estrutura Gramatical:</label>
+                <textarea id="grammar-input" placeholder="Explicação da estrutura gramatical" required></textarea>
+                <label>Vocabulário (separado por vírgulas):</label>
+                <input type="text" id="vocabulary-input" placeholder="例: 私 (watashi): eu, 毎日 (mainichi): todos os dias" required>
+                <button type="submit">Adicionar</button>
+            </form>
+        </div>
+        <div class="import-export">
+            <button id="export-btn">Exportar Flashcards (JSON)</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+            <button id="import-btn">Importar Flashcards</button>
+        </div>
+        <p id="flashcard-success" class="success" style="display: none;"></p>
+        <p id="flashcard-error" class="error" style="display: none;"></p>
+        <div class="nav-buttons">
+            <button class="nav-btn" id="status-btn">Voltar ao Status</button>
+            <button class="nav-btn" id="missions-btn">Ir para Missões</button>
+        </div>
+    </div>
+
+    <script>
+        // Cache de elementos DOM
+        const elements = {
+            flashcardContainer: document.getElementById("flashcard-container"),
+            nextReview: document.getElementById("next-review"),
+            frontText: document.getElementById("front-text"),
+            romaji: document.getElementById("romaji"),
+            translation: document.getElementById("translation"),
+            grammar: document.getElementById("grammar"),
+            vocabulary: document.getElementById("vocabulary"),
+            cardInner: document.querySelector(".card-inner"),
+            flashcardSuccess: document.getElementById("flashcard-success"),
+            flashcardError: document.getElementById("flashcard-error"),
+            flashcardForm: document.getElementById("flashcard-form"),
+            prevBtn: document.getElementById("prev-btn"),
+            flipBtn: document.getElementById("flip-btn"),
+            nextBtn: document.getElementById("next-btn"),
+            deleteBtn: document.getElementById("delete-btn"),
+            easyBtn: document.getElementById("easy-btn"),
+            mediumBtn: document.getElementById("medium-btn"),
+            hardBtn: document.getElementById("hard-btn"),
+            exportBtn: document.getElementById("export-btn"),
+            importBtn: document.getElementById("import-btn"),
+            importFile: document.getElementById("import-file"),
+            statusBtn: document.getElementById("status-btn"),
+            missionsBtn: document.getElementById("missions-btn")
+        };
+
+        let flashcards = [];
+        let currentCard = 0;
+        let isFlipped = false;
+
+        // Inicialização
+        document.addEventListener("DOMContentLoaded", () => {
+            try {
+                const loggedUser = localStorage.getItem("loggedUser");
+                let users;
+                try {
+                    users = JSON.parse(localStorage.getItem("users")) || {};
+                } catch (e) {
+                    throw new Error("Erro ao carregar usuários do localStorage");
+                }
+
+                if (!loggedUser || !users[loggedUser]) {
+                    showMessage("Nenhum usuário logado. Redirecionando para o login...", false);
+                    setTimeout(() => goToStatus(), 2000);
+                    return;
+                }
+
+                // Carregar flashcards
+                loadFlashcardsFromLocalStorage();
+
+                // Adicionar eventos
+                elements.prevBtn.addEventListener("click", previousCard);
+                elements.flipBtn.addEventListener("click", flipCard);
+                elements.nextBtn.addEventListener("click", nextCard);
+                elements.deleteBtn.addEventListener("click", deleteCard);
+                elements.easyBtn.addEventListener("click", () => markReviewed("easy"));
+                elements.mediumBtn.addEventListener("click", () => markReviewed("medium"));
+                elements.hardBtn.addEventListener("click", () => markReviewed("hard"));
+                elements.exportBtn.addEventListener("click", exportFlashcards);
+                elements.importBtn.addEventListener("click", () => elements.importFile.click());
+                elements.importFile.addEventListener("change", importFlashcards);
+                elements.statusBtn.addEventListener("click", goToStatus);
+                elements.missionsBtn.addEventListener("click", goToMissions);
+                elements.flashcardForm.addEventListener("submit", addFlashcard);
+
+                // Exibir contêiner
+                elements.flashcardContainer.style.display = "block";
+            } catch (e) {
+                console.error("Erro ao inicializar flashcards:", e);
+                showMessage("Erro ao carregar flashcards. Redirecionando...", false);
+                setTimeout(() => goToStatus(), 2000);
+            }
+        });
+
+        // Funções de manipulação de flashcards
+        function parseFurigana(phrase, furigana) {
+            try {
+                if (!furigana) return phrase;
+                const furiganaEntries = furigana.split(',').map(f => f.trim().match(/(.+)\[(.+)\]/)).filter(Boolean);
+                let result = phrase;
+                furiganaEntries.forEach(([_, kanji, reading]) => {
+                    result = result.replace(kanji, `<ruby>${kanji}<rt>${reading}</rt></ruby>`);
+                });
+                return result;
+            } catch (e) {
+                console.error("Erro ao parsear furigana:", e);
+                return phrase;
+            }
+        }
+
+        function calculateNextReview(srsLevel, difficulty) {
+            try {
+                const now = new Date();
+                let interval;
+                if (difficulty === "easy") {
+                    interval = (srsLevel + 1) * 7;
+                } else if (difficulty === "medium") {
+                    interval = (srsLevel + 1) * 3;
+                } else {
+                    interval = 1;
+                }
+                now.setDate(now.getDate() + interval);
+                return now.toISOString();
+            } catch (e) {
+                console.error("Erro ao calcular próxima revisão:", e);
+                return new Date().toISOString();
+            }
+        }
+
+        function displayCard() {
+            try {
+                const card = flashcards[currentCard];
+                if (!card) {
+                    elements.frontText.innerHTML = "Nenhum flashcard disponível.";
+                    elements.romaji.textContent = "";
+                    elements.translation.textContent = "";
+                    elements.grammar.textContent = "";
+                    elements.vocabulary.textContent = "";
+                    elements.nextReview.textContent = "N/A";
+                    return;
+                }
+                elements.frontText.innerHTML = parseFurigana(card.phrase, card.furigana);
+                elements.romaji.textContent = `Romaji: ${card.romaji}`;
+                elements.translation.textContent = `Tradução: ${card.translation}`;
+                elements.grammar.textContent = `Gramática: ${card.grammar}`;
+                elements.vocabulary.textContent = `Vocabulário: ${card.vocabulary}`;
+                elements.nextReview.textContent = new Date(card.nextReview).toLocaleString();
+                isFlipped = false;
+                elements.cardInner.classList.remove("flipped");
+            } catch (e) {
+                console.error("Erro ao exibir cartão:", e);
+                showMessage("Erro ao exibir flashcard.", false);
+            }
+        }
+
+        function flipCard() {
+            try {
+                isFlipped = !isFlipped;
+                elements.cardInner.classList.toggle("flipped");
+            } catch (e) {
+                console.error("Erro ao virar cartão:", e);
+            }
+        }
+
+        function nextCard() {
+            try {
+                const now = new Date();
+                const dueCards = flashcards.filter(card => new Date(card.nextReview) <= now);
+                if (dueCards.length > 0) {
+                    currentCard = flashcards.indexOf(dueCards[Math.floor(Math.random() * dueCards.length)]);
+                } else if (currentCard < flashcards.length - 1) {
+                    currentCard++;
+                }
+                displayCard();
+            } catch (e) {
+                console.error("Erro ao avançar cartão:", e);
+                showMessage("Erro ao avançar flashcard.", false);
+            }
+        }
+
+        function previousCard() {
+            try {
+                if (currentCard > 0) {
+                    currentCard--;
+                    displayCard();
+                }
+            } catch (e) {
+                console.error("Erro ao retroceder cartão:", e);
+                showMessage("Erro ao retroceder flashcard.", false);
+            }
+        }
+
+        function deleteCard() {
+            try {
+                if (flashcards.length === 0) return;
+                if (confirm("Tem certeza que deseja apagar este flashcard?")) {
+                    flashcards.splice(currentCard, 1);
+                    if (currentCard >= flashcards.length) currentCard = flashcards.length - 1;
+                    saveFlashcardsToLocalStorage();
+                    displayCard();
+                    showMessage("Flashcard apagado com sucesso!", true);
+                }
+            } catch (e) {
+                console.error("Erro ao apagar cartão:", e);
+                showMessage("Erro ao apagar flashcard.", false);
+            }
+        }
+
+        function markReviewed(difficulty) {
+            try {
+                if (!flashcards[currentCard]) return;
+                flashcards[currentCard].srsLevel = (flashcards[currentCard].srsLevel || 0) + 1;
+                flashcards[currentCard].nextReview = calculateNextReview(flashcards[currentCard].srsLevel, difficulty);
+                saveFlashcardsToLocalStorage();
+
+                // Atualizar stats
+                const users = JSON.parse(localStorage.getItem("users"));
+                const user = users[localStorage.getItem("loggedUser")];
+                if (user) {
+                    user.profile.stats.vocabulario = (user.profile.stats.vocabulario || 1) + 3;
+                    user.profile.stats.gramatica = (user.profile.stats.gramatica || 1) + 2;
+                    user.profile.stats.kanjis = (user.profile.stats.kanjis || 1) + 2;
+                    user.profile.stats.fala = (user.profile.stats.fala || 1) + 1;
+                    localStorage.setItem("users", JSON.stringify(users));
+                }
+
+                // Mostrar mensagem e partículas
+                showMessage(`Flashcard marcado como ${difficulty === "easy" ? "Fácil" : difficulty === "medium" ? "Médio" : "Difícil"}! +3 Vocabulário, +2 Gramática, +2 Kanjis, +1 Fala`, true);
+                createParticles(event.target);
+
+                nextCard();
+            } catch (e) {
+                console.error("Erro ao marcar revisão:", e);
+                showMessage("Erro ao revisar flashcard.", false);
+            }
+        }
+
+        function addFlashcard(e) {
+            try {
+                e.preventDefault();
+                const newCard = {
+                    phrase: document.getElementById("phrase").value,
+                    furigana: document.getElementById("furigana").value,
+                    romaji: document.getElementById("romaji-input").value,
+                    translation: document.getElementById("translation-input").value,
+                    grammar: document.getElementById("grammar-input").value,
+                    vocabulary: document.getElementById("vocabulary-input").value,
+                    srsLevel: 0,
+                    nextReview: new Date().toISOString()
+                };
+                flashcards.push(newCard);
+                saveFlashcardsToLocalStorage();
+                elements.flashcardForm.reset();
+                showMessage("Flashcard adicionado com sucesso!", true);
+                displayCard();
+            } catch (e) {
+                console.error("Erro ao adicionar flashcard:", e);
+                showMessage("Erro ao adicionar flashcard.", false);
+            }
+        }
+
+        function exportFlashcards() {
+            try {
+                const dataStr = JSON.stringify(flashcards, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "flashcards.json";
+                a.click();
+                URL.revokeObjectURL(url);
+                showMessage("Flashcards exportados com sucesso!", true);
+            } catch (e) {
+                console.error("Erro ao exportar flashcards:", e);
+                showMessage("Erro ao exportar flashcards.", false);
+            }
+        }
+
+        function importFlashcards() {
+            try {
+                const file = elements.importFile.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedCards = JSON.parse(e.target.result);
+                        if (Array.isArray(importedCards)) {
+                            flashcards = [...flashcards, ...importedCards];
+                            saveFlashcardsToLocalStorage();
+                            currentCard = 0;
+                            displayCard();
+                            showMessage("Flashcards importados com sucesso!", true);
+                        } else {
+                            showMessage("Arquivo JSON inválido!", false);
+                        }
+                    } catch (error) {
+                        console.error("Erro ao importar flashcards:", error);
+                        showMessage("Erro ao importar flashcards.", false);
+                    }
+                };
+                reader.readAsText(file);
+                elements.importFile.value = "";
+            } catch (e) {
+                console.error("Erro ao importar flashcards:", e);
+                showMessage("Erro ao importar flashcards.", false);
+            }
+        }
+
+        function saveFlashcardsToLocalStorage() {
+            try {
+                localStorage.setItem("flashcards", JSON.stringify(flashcards));
+            } catch (e) {
+                console.error("Erro ao salvar flashcards:", e);
+                showMessage("Erro ao salvar flashcards.", false);
+            }
+        }
+
+        function loadFlashcardsFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem("flashcards");
+                if (saved) {
+                    flashcards = JSON.parse(saved);
+                } else {
+                    flashcards = [
+                        {
+                            phrase: "私は毎朝本を読みます。",
+                            furigana: "私[わたし] 毎朝[まいあさ] 本[ほん] 読[よ]みます。",
+                            romaji: "Watashi wa maiasa hon o yomimasu.",
+                            translation: "Eu leio um livro todas as manhãs.",
+                            grammar: "Estrutura: [Sujeito + wa + tempo + objeto + o + verbo]. Usa 'wa' para marcar o sujeito e 'o' para o objeto.",
+                            vocabulary: "私 (watashi): eu, 毎朝 (maiasa): todas as manhãs, 本 (hon): livro, 読みます (yomimasu): ler",
+                            srsLevel: 0,
+                            nextReview: new Date().toISOString()
+                        },
+                        {
+                            phrase: "友達と一緒に映画を見ました。",
+                            furigana: "友達[ともだち] 一緒[いっしょ]に 映画[えいが] 見[み]ました。",
+                            romaji: "Tomodachi to issho ni eiga o mimashita.",
+                            translation: "Assisti a um filme com amigos.",
+                            grammar: "Estrutura: [Sujeito + to + advérbio + objeto + o + verbo]. 'to' indica companhia.",
+                            vocabulary: "友達 (tomodachi): amigo, 一緒に (issho ni): junto, 映画 (eiga): filme, 見ました (mimashita): assistiu",
+                            srsLevel: 0,
+                            nextReview: new Date().toISOString()
+                        }
+                    ];
+                }
+                displayCard();
+            } catch (e) {
+                console.error("Erro ao carregar flashcards:", e);
+                showMessage("Erro ao carregar flashcards.", false);
+            }
+        }
+
+        // Navegação
+        function goToStatus() {
+            try {
+                window.location.href = "./index.html";
+            } catch (e) {
+                console.error("Erro ao redirecionar para index.html:", e);
+                showMessage("Erro ao voltar para o status.", false);
+            }
+        }
+
+        function goToMissions() {
+            try {
+                window.location.href = "./missions.html";
+            } catch (e) {
+                console.error("Erro ao redirecionar para missions.html:", e);
+                showMessage("Erro ao ir para missões.", false);
+            }
+        }
+
+        // Mostrar mensagem
+        function showMessage(text, isSuccess) {
+            const messageElement = isSuccess ? elements.flashcardSuccess : elements.flashcardError;
+            messageElement.textContent = text;
+            messageElement.style.display = "block";
+            setTimeout(() => {
+                messageElement.style.display = "none";
+            }, 2000);
+        }
+
+        // Criar efeito de partículas
+        function createParticles(button) {
+            try {
+                const rect = button.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                for (let i = 0; i < 10; i++) {
+                    const particle = document.createElement("div");
+                    particle.className = "particles";
+                    particle.style.left = `${x}px`;
+                    particle.style.top = `${y}px`;
+                    const angle = Math.random() * 360;
+                    const distance = 50 + Math.random() * 50;
+                    particle.style.setProperty("--x", `${Math.cos(angle) * distance}px`);
+                    particle.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
+                    document.body.appendChild(particle);
+                    particle.addEventListener("animationend", () => particle.remove());
+                }
+            } catch (e) {
+                console.error("Erro ao criar partículas:", e);
+            }
+        }
+    </script>
+</body>
+</html>

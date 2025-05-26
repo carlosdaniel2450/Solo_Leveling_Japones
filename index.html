@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tela de Status - Solo Leveling</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .login-container, .register-container, .status-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #6A5ACD;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(106, 90, 205, 0.5);
+            text-align: center;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .login-container[style*="block"], 
+        .register-container[style*="block"], 
+        .status-container[style*="block"] {
+            opacity: 1;
+        }
+
+        .login-container, .register-container {
+            display: none;
+        }
+
+        .login-container h2, .register-container h2 {
+            color: #6A5ACD;
+            margin-bottom: 20px;
+            font-size: clamp(1.5rem, 5vw, 1.8rem);
+        }
+
+        .login-container input, .register-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #6A5ACD;
+            border-radius: 5px;
+            background: #333;
+            color: #fff;
+            font-size: clamp(0.9rem, 4vw, 1rem);
+            box-sizing: border-box;
+        }
+
+        .input-error {
+            border: 2px solid red;
+        }
+
+        .login-container button, .register-container button {
+            padding: 10px 20px;
+            background: #6A5ACD;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 5px;
+            font-size: clamp(0.9rem, 4vw, 1rem);
+        }
+
+        .login-container button:hover, .register-container button:hover {
+            background: #483D8B;
+        }
+
+        .status-container {
+            display: none;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .profile-pic {
+            width: clamp(80px, 25vw, 100px);
+            height: clamp(80px, 25vw, 100px);
+            border-radius: 50%;
+            border: 3px solid #6A5ACD;
+            object-fit: cover;
+        }
+
+        .profile-info h2 {
+            margin: 0;
+            font-size: clamp(1.2rem, 5vw, 1.5rem);
+            color: #6A5ACD;
+        }
+
+        .profile-info .rank {
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            color: #6A5ACD;
+            font-weight: bold;
+        }
+
+        .profile-info p {
+            margin: 5px 0;
+            font-size: clamp(0.9rem, 4vw, 1rem);
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #6A5ACD;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: #6A5ACD;
+            transform: scale(1.05);
+        }
+
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .stat span {
+            font-size: clamp(0.9rem, 4vw, 1rem);
+        }
+
+        .level {
+            color: #6A5ACD;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress {
+            height: 100%;
+            background: #6A5ACD;
+            transition: width 1s ease-in-out;
+        }
+
+        .missions {
+            margin-top: 15px;
+        }
+
+        .missions h4 {
+            margin: 10px 0;
+            color: #6A5ACD;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+        }
+
+        .missions ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        .missions li {
+            margin: 5px 0;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+        }
+
+        .logout-btn, .nav-btn, .export-btn, .import-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #6A5ACD;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-size: clamp(0.9rem, 4vw, 1rem);
+            width: 100%;
+        }
+
+        .logout-btn:hover, .nav-btn:hover, .export-btn:hover, .import-btn:hover {
+            background: #483D8B;
+            transform: scale(1.05);
+        }
+
+        .error, .success {
+            margin: 10px 0;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: #6A5ACD;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        /* NOVO: Estilo para pop-up de rank */
+        .rank-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #6A5ACD;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            color: #fff;
+            font-size: clamp(1.2rem, 5vw, 1.5rem);
+            box-shadow: 0 0 30px rgba(106, 90, 205, 0.7);
+            z-index: 1000;
+            animation: popIn 0.5s ease-out forwards, popOut 0.5s ease-out 2s forwards;
+        }
+
+        .rank-popup.s-rank {
+            border-color: #FFD700; /* Ouro para Rank S */
+            background: rgba(50, 0, 50, 0.9); /* Fundo roxo escuro */
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.7);
+        }
+
+        @keyframes popIn {
+            from { transform: translate(-50%, -50%) scale(0); }
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes popOut {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(0); }
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @media (max-width: 600px) {
+            .profile-section {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .profile-pic {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .login-container input, .register-container input {
+                width: 100%;
+            }
+
+            .login-container button, .register-container button, .logout-btn, .nav-btn, .export-btn, .import-btn {
+                width: 100%;
+                padding: 12px;
+            }
+
+            .tabs {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .tab-btn {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="login-container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Nome de Usuário" required>
+        <input type="password" id="password" placeholder="Senha" required>
+        <button id="login-btn">Entrar</button>
+        <button id="show-register-btn">Cadastrar</button>
+        <p id="login-error" class="error" style="display: none;">Usuário ou senha incorretos!</p>
+    </div>
+
+    <div class="register-container" id="register-container">
+        <h2>Cadastro</h2>
+        <input type="text" id="reg-username" placeholder="Nome de Usuário" required>
+        <input type="password" id="reg-password" placeholder="Senha" required>
+        <input type="number" id="reg-age" placeholder="Digite sua idade (ex.: 25)" required>
+        <input type="text" id="reg-profile-pic" placeholder="URL da Foto (opcional)">
+        <button id="register-btn">Cadastrar</button>
+        <button id="show-login-btn">Voltar ao Login</button>
+        <p id="register-error" class="error" style="display: none;"></p>
+        <p id="register-success" class="success" style="display: none;">Cadastro realizado com sucesso!</p>
+    </div>
+
+    <div class="status-container" id="status-container">
+        <div class="profile-section">
+            <img class="profile-pic" id="profile-pic" src="https://via.placeholder.com/100" alt="Foto de Perfil">
+            <div class="profile-info">
+                <h2 id="name">Sung Jin-Woo <span class="rank" id="player-rank">Rank B</span></h2>
+                <p>Idade: <span id="age">25</span></p>
+            </div>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('leitura')">Leitura</button>
+            <button class="tab-btn" onclick="showTab('escrita')">Escrita</button>
+            <button class="tab-btn" onclick="showTab('escuta')">Escuta</button>
+            <button class="tab-btn" onclick="showTab('kanjis')">Kanjis</button>
+            <button class="tab-btn" onclick="showTab('vocabulario')">Vocabulário</button>
+            <button class="tab-btn" onclick="showTab('gramatica')">Gramática</button>
+        </div>
+        <div class="stats-section">
+            <div id="leitura" class="tab-content active">
+                <div class="stat">
+                    <span>Leitura</span>
+                    <span class="level" id="leitura-level">50</span>
+                </div>
+                <div class="progress-bar"><div class="progress" id="leitura-progress" style="width: 50%;"></div></div>
+                <div class="missions">
+                    <h4>Missões para Upar Leitura</h4>
+                    <ul>
+                        <li>Ler 10 páginas de um livro em japonês (Nível N5/N4) (+50 pontos)</li>
+                        <li>Completar 5 artigos no Satori Reader (+30 pontos)</li>
+                        <li>Ler 3 notícias no NHK Easy News (+40 pontos)</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="escrita" class="tab-content">
+                <div class="stat">
+                    <span>Escrita</span>
+                    <span class="level" id="escrita-level">40</span>
+                </div>
+                <div class="progress-bar"><div class="progress" id="escrita-progress" style="width: 40%;"></div></div>
+                <div class="missions">
+                    <h4>Missões para Upar Escrita</h4>
+                    <ul>
+                        <li>Escrever 10 frases em japonês usando vocabulário N5 (+30 pontos)</li>
+                        <li>Completar 5 exercícios no BunPro (+40 pontos)</li>
+                        <li>Escrever um diário de 100 palavras em japonês (+50 pontos)</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="escuta" class="tab-content">
+                <div class="stat">
+                    <span>Escuta</span>
+                    <span class="level" id="escuta-level">60</span>
+                </div>
+                <div class="progress-bar"><div class="progress" id="escuta-progress" style="width: 60%;"></div></div>
+                <div class="missions">
+                    <h4>Missões para Upar Escuta</h4>
+                    <ul>
+                        <li>Assistir a 1 episódio de anime sem legendas (+50 pontos)</li>
+                        <li>Completar 5 lições no JapanesePod101 (+30 pontos)</li>
+                        <li>Ouvir 3 podcasts em japonês (ex.: Nihongo Con Teppei) (+40 pontos)</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="kanjis" class="tab-content">
+                <div class="stat">
+                    <span>Kanjis</span>
+                    <span class="level" id="kanjis-level">80</span>
+                </div>
+                <div class="progress-bar"><div class="progress" id="kanjis-progress" style="width: 80%;"></div></div>
+                <div class="missions">
+                    <h4>Missões para Upar Kanjis</h4>
+                    <ul>
+                        <li>Memorizar 10 kanjis novos no Wanikani (+50 pontos)</li>
+                        <li>Completar 20 flashcards de kanji no Anki (+30 pontos)</li>
+                        <li>Escrever 5 kanjis 10 vezes cada com significado (+40 pontos)</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="vocabulario" class="tab-content">
+                <div class="stat">
+                    <span>Vocabulário</span>
+                    <span class="level" id="vocabulario-level">90</span>
+                </div>
+                <div class="progress-bar"><div class="progress" id="vocabulario-progress" style="width: 90%;"></div></div>
+                <div class="missions">
+                    <h4>Missões para Upar Vocabulário</h4>
+                    <ul>
+                        <li>Aprender 20 palavras novas no Memrise (+50 pontos)</li>
+                        <li>Usar 10 palavras novas em frases no HelloTalk (+40 pontos)</li>
+                        <li>Completar 5 lições de vocabulário no LingoDeer (+30 pontos)</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="gramatica" class="tab-content">
+                <div class="stat">
+                    <span>Gramática</span>
+                    <span class="level" id="gramatica-level">60</span>
+                </div>
+                <div class="progress-bar"><div class="progress" id="gramatica-progress" style="width: 60%;"></div></div>
+                <div class="missions">
+                    <h4>Missões para Upar Gramática</h4>
+                    <ul>
+                        <li>Completar 10 exercícios de gramática no BunPro (+50 pontos)</li>
+                        <li>Escrever 5 frases usando uma nova estrutura gramatical (+30 pontos)</li>
+                        <li>Analisar 3 parágrafos de um texto em japonês (+40 pontos)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <button class="nav-btn" onclick="window.location.href='missions.html'">Missões</button>
+        <button class="nav-btn" onclick="window.location.href='flashcards.html'">Flashcards</button>
+        <button class="export-btn" id="export-btn">Exportar Cartão</button>
+        <button class="import-btn" id="import-btn">Importar Cartão</button>
+        <input type="file" id="import-file" accept=".json" style="display: none;">
+        <p id="status-message" class="success" style="display: none;"></p>
+        <button class="logout-btn" id="logout-btn">Sair</button>
+    </div>
+
+    <!-- NOVO: Elemento para pop-up de rank -->
+    <div id="rank-popup" class="rank-popup" style="display: none;"></div>
+
+    <script>
+        // Cache de elementos DOM
+        const elements = {
+            loginContainer: document.getElementById("login-container"),
+            registerContainer: document.getElementById("register-container"),
+            statusContainer: document.getElementById("status-container"),
+            loginError: document.getElementById("login-error"),
+            registerError: document.getElementById("register-error"),
+            registerSuccess: document.getElementById("register-success"),
+            usernameInput: document.getElementById("username"),
+            passwordInput: document.getElementById("password"),
+            regUsername: document.getElementById("reg-username"),
+            regPassword: document.getElementById("reg-password"),
+            regAge: document.getElementById("reg-age"),
+            regProfilePic: document.getElementById("reg-profile-pic"),
+            profilePic: document.getElementById("profile-pic"),
+            name: document.getElementById("name"),
+            age: document.getElementById("age"),
+            statusMessage: document.getElementById("status-message"),
+            rankPopup: document.getElementById("rank-popup") // NOVO: Pop-up de rank
+        };
+
+        // Carregar usuários do LocalStorage (ou inicializar com usuário padrão)
+        let users = (() => {
+            try {
+                return JSON.parse(localStorage.getItem("users")) || {
+                    "sungjinwoo": {
+                        password: "123456",
+                        profile: {
+                            username: "sungjinwoo",
+                            age: 25,
+                            profilePic: "https://via.placeholder.com/100",
+                            stats: {
+                                leitura: 50,
+                                escrita: 40,
+                                escuta: 60,
+                                kanjis: 80,
+                                vocabulario: 90,
+                                gramatica: 60
+                            },
+                            lastRank: "B" // NOVO: Armazena o último rank
+                        }
+                    }
+                };
+            } catch (e) {
+                console.error("Erro ao carregar localStorage:", e);
+                return {
+                    "sungjinwoo": {
+                        password: "123456",
+                        profile: {
+                            username: "sungjinwoo",
+                            age: 25,
+                            profilePic: "https://via.placeholder.com/100",
+                            stats: {
+                                leitura: 50,
+                                escrita: 40,
+                                escuta: 60,
+                                kanjis: 80,
+                                vocabulario: 90,
+                                gramatica: 60
+                            },
+                            lastRank: "B"
+                        }
+                    }
+                };
+            }
+        })();
+
+        // Garantir que o DOM esteja carregado antes de executar
+        document.addEventListener("DOMContentLoaded", () => {
+            try {
+                const loggedUser = localStorage.getItem("loggedUser");
+                if (loggedUser && users[loggedUser] && users[loggedUser].profile) {
+                    showStatus(users[loggedUser].profile);
+                } else {
+                    showLogin();
+                }
+
+                // Adicionar eventos aos botões
+                document.getElementById("login-btn").addEventListener("click", login);
+                document.getElementById("show-register-btn").addEventListener("click", showRegister);
+                document.getElementById("register-btn").addEventListener("click", register);
+                document.getElementById("show-login-btn").addEventListener("click", showLogin);
+                document.getElementById("logout-btn").addEventListener("click", logout);
+                document.getElementById("export-btn").addEventListener("click", exportCard);
+                document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-file").click());
+                document.getElementById("import-file").addEventListener("change", importCard);
+            } catch (e) {
+                console.error("Erro ao inicializar:", e);
+                elements.loginContainer.style.display = "block"; // Fallback para tela de login
+                elements.statusMessage.textContent = "Erro ao carregar. Tente novamente.";
+                elements.statusMessage.classList.remove("success");
+                elements.statusMessage.classList.add("error");
+                elements.statusMessage.style.display = "block";
+            }
+        });
+
+        // Mostrar tela de login
+        function showLogin() {
+            elements.loginContainer.style.display = "block";
+            elements.registerContainer.style.display = "none";
+            elements.statusContainer.style.display = "none";
+            elements.loginError.style.display = "none";
+            elements.usernameInput.classList.remove("input-error");
+            elements.passwordInput.classList.remove("input-error");
+            elements.usernameInput.focus();
+        }
+
+        // Mostrar tela de cadastro
+        function showRegister() {
+            elements.loginContainer.style.display = "none";
+            elements.registerContainer.style.display = "block";
+            elements.statusContainer.style.display = "none";
+            elements.registerError.style.display = "none";
+            elements.registerSuccess.style.display = "none";
+            elements.regUsername.value = "";
+            elements.regPassword.value = "";
+            elements.regAge.value = "";
+            elements.regProfilePic.value = "";
+            elements.regUsername.focus();
+        }
+
+        // Função de login
+        function login() {
+            const username = elements.usernameInput.value.trim();
+            const password = elements.passwordInput.value.trim();
+
+            if (users[username] && users[username].password === password) {
+                localStorage.setItem("loggedUser", username);
+                elements.loginContainer.style.display = "none";
+                elements.usernameInput.classList.remove("input-error");
+                elements.passwordInput.classList.remove("input-error");
+                showStatus(users[username].profile);
+            } else {
+                elements.loginError.style.display = "block";
+                elements.usernameInput.classList.add("input-error");
+                elements.passwordInput.classList.add("input-error");
+            }
+        }
+
+        // Função de cadastro
+        function register() {
+            const username = elements.regUsername.value.trim();
+            const password = elements.regPassword.value.trim();
+            const age = parseInt(elements.regAge.value);
+            const profilePic = elements.regProfilePic.value.trim() || "https://via.placeholder.com/100";
+
+            // Validações
+            if (!username || !password || !age) {
+                elements.registerError.textContent = "Preencha todos os campos obrigatórios!";
+                elements.registerError.style.display = "block";
+                return;
+            }
+            if (users[username]) {
+                elements.registerError.textContent = "Nome de usuário já existe!";
+                elements.registerError.style.display = "block";
+                return;
+            }
+            if (age < 1 || age > 120) {
+                elements.registerError.textContent = "Idade inválida!";
+                elements.registerError.style.display = "block";
+                return;
+            }
+
+            // Criar novo usuário
+            users[username] = {
+                password: password,
+                profile: {
+                    username: username,
+                    age: age,
+                    profilePic: profilePic,
+                    stats: {
+                        leitura: 1,
+                        escrita: 1,
+                        escuta: 1,
+                        kanjis: 1,
+                        vocabulario: 1,
+                        gramatica: 1
+                    },
+                    lastRank: "F" // NOVO: Inicializa com Rank F
+                }
+            };
+
+            // Salvar no LocalStorage com tratamento de erro
+            try {
+                localStorage.setItem("users", JSON.stringify(users));
+                elements.registerSuccess.style.display = "block";
+                elements.registerError.style.display = "none";
+                setTimeout(showLogin, 2000);
+            } catch (e) {
+                elements.registerError.textContent = "Erro ao salvar. Verifique as configurações do navegador.";
+                elements.registerError.style.display = "block";
+            }
+        }
+
+        // Função de logout
+        function logout() {
+            localStorage.removeItem("loggedUser");
+            showLogin();
+            elements.usernameInput.value = "";
+            elements.passwordInput.value = "";
+        }
+
+        // Sistema de ranks baseado na menor habilidade
+        function getPlayerRank(stats) {
+            const skills = Object.values(stats);
+            const minLevel = Math.min(...skills);
+
+            if (minLevel >= 95) return "S";
+            if (minLevel >= 70) return "A";
+            if (minLevel >= 40) return "B";
+            if (minLevel >= 20) return "C";
+            return "F";
+        }
+
+        // NOVO: Mostrar pop-up de mudança de rank
+        function showRankPopup(newRank) {
+            elements.rankPopup.textContent = `Parabéns! Você alcançou o Rank ${newRank}!`;
+            elements.rankPopup.style.display = "block";
+            elements.rankPopup.classList.remove("s-rank");
+            if (newRank === "S") {
+                elements.rankPopup.classList.add("s-rank"); // Estilo especial para Rank S
+            }
+            setTimeout(() => {
+                elements.rankPopup.style.display = "none";
+            }, 2500); // Pop-up visível por 2.5 segundos
+        }
+
+        // Exibir status do jogador
+        function showStatus(profile) {
+            try {
+                elements.statusContainer.style.display = "block";
+                elements.loginContainer.style.display = "none";
+                elements.registerContainer.style.display = "none";
+                elements.name.innerHTML = `${profile.username} <span class="rank" id="player-rank">Rank ${getPlayerRank(profile.stats)}</span>`;
+                elements.age.textContent = profile.age;
+                elements.profilePic.src = profile.profilePic;
+                elements.profilePic.onerror = () => {
+                    elements.profilePic.src = "https://via.placeholder.com/100";
+                };
+
+                const stats = profile.stats;
+                for (let stat in stats) {
+                    const levelElement = document.getElementById(`${stat}-level`);
+                    const progressElement = document.getElementById(`${stat}-progress`);
+                    if (levelElement && progressElement) {
+                        levelElement.textContent = stats[stat];
+                        progressElement.style.width = `${Math.min(stats[stat], 100)}%`; // Barra limitada a 100% para visualização
+                    }
+                }
+
+                // NOVO: Verificar mudança de rank
+                const currentRank = getPlayerRank(profile.stats);
+                const lastRank = profile.lastRank || "F";
+                if (currentRank !== lastRank) {
+                    showRankPopup(currentRank);
+                    profile.lastRank = currentRank;
+                    const username = localStorage.getItem("loggedUser");
+                    if (username && users[username]) {
+                        users[username].profile.lastRank = currentRank;
+                        localStorage.setItem("users", JSON.stringify(users));
+                    }
+                }
+
+                showTab('leitura');
+            } catch (e) {
+                console.error("Erro ao exibir status:", e);
+                elements.statusMessage.textContent = "Erro ao carregar status. Tente novamente.";
+                elements.statusMessage.classList.remove("success");
+                elements.statusMessage.classList.add("error");
+                elements.statusMessage.style.display = "block";
+                showLogin(); // Fallback para login
+            }
+        }
+
+        // Alternar entre abas
+        function showTab(tabId) {
+            try {
+                const tabs = document.querySelectorAll('.tab-content');
+                const buttons = document.querySelectorAll('.tab-btn');
+                tabs.forEach(tab => tab.classList.remove('active'));
+                buttons.forEach(btn => btn.classList.remove('active'));
+                const tabElement = document.getElementById(tabId);
+                const buttonElement = document.querySelector(`.tab-btn[onclick="showTab('${tabId}')"]`);
+                if (tabElement && buttonElement) {
+                    tabElement.classList.add('active');
+                    buttonElement.classList.add('active');
+                }
+            } catch (e) {
+                console.error("Erro ao alternar aba:", e);
+            }
+        }
+
+        // Exportar cartão de jogador
+        function exportCard() {
+            try {
+                const username = localStorage.getItem("loggedUser");
+                if (!username || !users[username]) {
+                    elements.statusMessage.textContent = "Nenhum usuário logado!";
+                    elements.statusMessage.classList.remove("success");
+                    elements.statusMessage.classList.add("error");
+                    elements.statusMessage.style.display = "block";
+                    setTimeout(() => elements.statusMessage.style.display = "none", 2000);
+                    return;
+                }
+
+                const userData = users[username].profile;
+                const dataStr = JSON.stringify(userData, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `${username}_card.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                elements.statusMessage.textContent = "Cartão exportado com sucesso!";
+                elements.statusMessage.classList.remove("error");
+                elements.statusMessage.classList.add("success");
+                elements.statusMessage.style.display = "block";
+                setTimeout(() => elements.statusMessage.style.display = "none", 2000);
+            } catch (e) {
+                console.error("Erro ao exportar cartão:", e);
+                elements.statusMessage.textContent = "Erro ao exportar cartão.";
+                elements.statusMessage.classList.remove("success");
+                elements.statusMessage.classList.add("error");
+                elements.statusMessage.style.display = "block";
+                setTimeout(() => elements.statusMessage.style.display = "none", 2000);
+            }
+        }
+
+        // Importar cartão de jogador
+        function importCard(event) {
+            try {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        const username = localStorage.getItem("loggedUser");
+                        if (!username) {
+                            elements.statusMessage.textContent = "Faça login antes de importar!";
+                            elements.statusMessage.classList.remove("success");
+                            elements.statusMessage.classList.add("error");
+                            elements.statusMessage.style.display = "block";
+                            setTimeout(() => elements.statusMessage.style.display = "none", 2000);
+                            return;
+                        }
+
+                        // Validar dados importados
+                        if (!importedData.username || !importedData.age || !importedData.stats) {
+                            elements.statusMessage.textContent = "Arquivo inválido!";
+                            elements.statusMessage.classList.remove("success");
+                            elements.statusMessage.classList.add("error");
+                            elements.statusMessage.style.display = "block";
+                            setTimeout(() => elements.statusMessage.style.display = "none", 2000);
+                            return;
+                        }
+
+                        // Atualizar dados sem limite de pontos
+                        const previousRank = getPlayerRank(users[username].profile.stats);
+                        users[username].profile = {
+                            username: users[username].profile.username,
+                            age: importedData.age,
+                            profilePic: importedData.profilePic || "https://via.placeholder.com/100",
+                            stats: {
+                                leitura: Math.max(importedData.stats.leitura || 1, 1),
+                                escrita: Math.max(importedData.stats.escrita || 1, 1),
+                                escuta: Math.max(importedData.stats.escuta || 1, 1),
+                                kanjis: Math.max(importedData.stats.kanjis || 1, 1),
+                                vocabulario: Math.max(importedData.stats.vocabulario || 1, 1),
+                                gramatica: Math.max(importedData.stats.gramatica || 1, 1)
+                            },
+                            lastRank: users[username].profile.lastRank || "F"
+                        };
+
+                        localStorage.setItem("users", JSON.stringify(users));
+                        showStatus(users[username].profile);
+                        const newRank = getPlayerRank(users[username].profile.stats);
+                        if (newRank !== previousRank) {
+                            showRankPopup(newRank);
+                            users[username].profile.lastRank = newRank;
+                            localStorage.setItem("users", JSON.stringify(users));
+                        }
+
+                        elements.statusMessage.textContent = "Cartão importado com sucesso!";
+                        elements.statusMessage.classList.remove("error");
+                        elements.statusMessage.classList.add("success");
+                        elements.statusMessage.style.display = "block";
+                        setTimeout(() => elements.statusMessage.style.display = "none", 2000);
+                    } catch (e) {
+                        console.error("Erro ao processar arquivo:", e);
+                        elements.statusMessage.textContent = "Erro ao importar arquivo!";
+                        elements.statusMessage.classList.remove("success");
+                        elements.statusMessage.classList.add("error");
+                        elements.statusMessage.style.display = "block";
+                        setTimeout(() => elements.statusMessage.style.display = "none", 2000);
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = "";
+            } catch (e) {
+                console.error("Erro ao importar cartão:", e);
+                elements.statusMessage.textContent = "Erro ao importar cartão.";
+                elements.statusMessage.classList.remove("success");
+                elements.statusMessage.classList.add("error");
+                elements.statusMessage.style.display = "block";
+                setTimeout(() => elements.statusMessage.style.display = "none", 2000);
+            }
+        }
+    </script>
+</body>
+</html>

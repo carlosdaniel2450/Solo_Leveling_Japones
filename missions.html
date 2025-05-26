@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missões - Solo Leveling</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .missions-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #6A5ACD;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(106, 90, 205, 0.5);
+            text-align: center;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 10;
+        }
+
+        .missions-container[style*="block"] {
+            opacity: 1;
+        }
+
+        .missions-container h2 {
+            color: #6A5ACD;
+            margin-bottom: 20px;
+            font-size: clamp(1.5rem, 5vw, 1.8rem);
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #6A5ACD;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: #6A5ACD;
+            transform: scale(1.05);
+        }
+
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .missions {
+            margin-top: 15px;
+        }
+
+        .missions h4 {
+            margin: 10px 0;
+            color: #6A5ACD;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+        }
+
+        .missions ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        .missions li {
+            margin: 10px 0;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mission-btn {
+            padding: 5px 10px;
+            background: #6A5ACD;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-btn:hover {
+            background: #483D8B;
+            transform: scale(1.05);
+        }
+
+        .mission-btn:active {
+            animation: pulse 0.2s ease-in-out;
+        }
+
+        .back-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #6A5ACD;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            font-size: clamp(0.9rem, 4vw, 1rem);
+            width: 100%;
+        }
+
+        .back-btn:hover {
+            background: #483D8B;
+            transform: scale(1.05);
+        }
+
+        .success, .error {
+            margin: 10px 0;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        .success {
+            color: #6A5ACD;
+        }
+
+        .error {
+            color: red;
+        }
+
+        /* NOVO: Efeito de partículas */
+        .particles {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #6A5ACD;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle 1s ease-out forwards;
+        }
+
+        @keyframes particle {
+            0% { transform: translate(0, 0); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)); opacity: 0; }
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            .tabs {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .tab-btn {
+                padding: 12px;
+            }
+
+            .mission-btn {
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="missions-container" id="missions-container">
+        <h2>Missões de Aprendizado</h2>
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="leitura">Leitura</button>
+            <button class="tab-btn" data-tab="escrita">Escrita</button>
+            <button class="tab-btn" data-tab="escuta">Escuta</button>
+            <button class="tab-btn" data-tab="kanjis">Kanjis</button>
+            <button class="tab-btn" data-tab="vocabulario">Vocabulário</button>
+            <button class="tab-btn" data-tab="gramatica">Gramática</button>
+            <button class="tab-btn" data-tab="fala">Fala</button>
+        </div>
+        <div class="missions-section">
+            <div id="leitura" class="tab-content active">
+                <div class="missions">
+                    <h4>Missões para Upar Leitura</h4>
+                    <ul>
+                        <li>Ler 10 páginas de um livro em japonês (Nível N5/N4) (+5 pontos)<button class="mission-btn" data-skill="leitura" data-points="5">Completar</button></li>
+                        <li>Completar 5 artigos no Satori Reader (+4 pontos)<button class="mission-btn" data-skill="leitura" data-points="4">Completar</button></li>
+                        <li>Ler 3 notícias no NHK Easy News (+3 pontos)<button class="mission-btn" data-skill="leitura" data-points="3">Completar</button></li>
+                        <li>Ler um mangá de 20 páginas em japonês (+6 pontos)<button class="mission-btn" data-skill="leitura" data-points="6">Completar</button></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="escrita" class="tab-content">
+                <div class="missions">
+                    <h4>Missões para Upar Escrita</h4>
+                    <ul>
+                        <li>Escrever 10 frases em japonês usando vocabulário N5 (+3 pontos)<button class="mission-btn" data-skill="escrita" data-points="3">Completar</button></li>
+                        <li>Completar 5 exercícios no BunPro (+5 pontos)<button class="mission-btn" data-skill="escrita" data-points="5">Completar</button></li>
+                        <li>Escrever um diário de 100 palavras em japonês (+8 pontos)<button class="mission-btn" data-skill="escrita" data-points="8">Completar</button></li>
+                        <li>Escrever um e-mail formal em japonês (+7 pontos)<button class="mission-btn" data-skill="escrita" data-points="7">Completar</button></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="escuta" class="tab-content">
+                <div class="missions">
+                    <h4>Missões para Upar Escuta</h4>
+                    <ul>
+                        <li>Assistir a 1 episódio de anime sem legendas (+8 pontos)<button class="mission-btn" data-skill="escuta" data-points="8">Completar</button></li>
+                        <li>Completar 5 lições no JapanesePod101 (+4 pontos)<button class="mission-btn" data-skill="escuta" data-points="4">Completar</button></li>
+                        <li>Ouvir 3 podcasts em japonês (ex.: Nihongo Con Teppei) (+6 pontos)<button class="mission-btn" data-skill="escuta" data-points="6">Completar</button></li>
+                        <li>Transcrever 5 minutos de um vídeo em japonês (+7 pontos)<button class="mission-btn" data-skill="escuta" data-points="7">Completar</button></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="kanjis" class="tab-content">
+                <div class="missions">
+                    <h4>Missões para Upar Kanjis</h4>
+                    <ul>
+                        <li>Memorizar 10 kanjis novos no Wanikani (+5 pontos)<button class="mission-btn" data-skill="kanjis" data-points="5">Completar</button></li>
+                        <li>Completar 20 flashcards de kanji no Anki (+4 pontos)<button class="mission-btn" data-skill="kanjis" data-points="4">Completar</button></li>
+                        <li>Escrever 5 kanjis 10 vezes cada com significado (+5 pontos)<button class="mission-btn" data-skill="kanjis" data-points="5">Completar</button></li>
+                        <li>Criar 5 frases com kanjis aprendidos (+6 pontos)<button class="mission-btn" data-skill="kanjis" data-points="6">Completar</button></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="vocabulario" class="tab-content">
+                <div class="missions">
+                    <h4>Missões para Upar Vocabulário</h4>
+                    <ul>
+                        <li>Aprender 20 palavras novas no Memrise (+5 pontos)<button class="mission-btn" data-skill="vocabulario" data-points="5">Completar</button></li>
+                        <li>Usar 10 palavras novas em frases no HelloTalk (+6 pontos)<button class="mission-btn" data-skill="vocabulario" data-points="6">Completar</button></li>
+                        <li>Completar 5 lições de vocabulário no LingoDeer (+3 pontos)<button class="mission-btn" data-skill="vocabulario" data-points="3">Completar</button></li>
+                        <li>Identificar 10 palavras novas em um texto (+4 pontos)<button class="mission-btn" data-skill="vocabulario" data-points="4">Completar</button></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="gramatica" class="tab-content">
+                <div class="missions">
+                    <h4>Missões para Upar Gramática</h4>
+                    <ul>
+                        <li>Completar 10 exercícios de gramática no BunPro (+5 pontos)<button class="mission-btn" data-skill="gramatica" data-points="5">Completar</button></li>
+                        <li>Escrever 5 frases usando uma nova estrutura gramatical (+4 pontos)<button class="mission-btn" data-skill="gramatica" data-points="4">Completar</button></li>
+                        <li>Analisar 3 parágrafos de um texto em japonês (+8 pontos)<button class="mission-btn" data-skill="gramatica" data-points="8">Completar</button></li>
+                        <li>Explicar uma regra gramatical em japonês (+6 pontos)<button class="mission-btn" data-skill="gramatica" data-points="6">Completar</button></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="fala" class="tab-content">
+                <div class="missions">
+                    <h4>Missões para Upar Fala</h4>
+                    <ul>
+                        <li>Praticar 5 minutos de shadowing com um vídeo (+5 pontos)<button class="mission-btn" data-skill="fala" data-points="5">Completar</button></li>
+                        <li>Gravar um diálogo de 1 minuto em japonês (+7 pontos)<button class="mission-btn" data-skill="fala" data-points="7">Completar</button></li>
+                        <li>Conversar com um nativo por 10 minutos (+8 pontos)<button class="mission-btn" data-skill="fala" data-points="8">Completar</button></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <p id="mission-message" class="success" style="display: none;"></p>
+        <button class="back-btn" id="back-btn">Voltar ao Status</button>
+    </div>
+
+    <script>
+        // Cache de elementos DOM
+        const elements = {
+            missionsContainer: document.getElementById("missions-container"),
+            missionMessage: document.getElementById("mission-message"),
+            backBtn: document.getElementById("back-btn")
+        };
+
+        // Inicialização
+        document.addEventListener("DOMContentLoaded", () => {
+            try {
+                const loggedUser = localStorage.getItem("loggedUser");
+                const users = JSON.parse(localStorage.getItem("users")) || {};
+                if (!loggedUser || !users[loggedUser]) {
+                    showMessage("Usuário não logado. Redirecionando...", false);
+                    setTimeout(() => window.location.href = "./index.html", 2000);
+                    return;
+                }
+
+                // Adicionar eventos aos botões de aba
+                document.querySelectorAll(".tab-btn").forEach(btn => {
+                    btn.addEventListener("click", () => showTab(btn.dataset.tab));
+                });
+
+                // Adicionar eventos aos botões de missão
+                document.querySelectorAll(".mission-btn").forEach(btn => {
+                    btn.addEventListener("click", () => completeMission(btn.dataset.skill, parseInt(btn.dataset.points), btn));
+                });
+
+                // Evento do botão voltar
+                elements.backBtn.addEventListener("click", goToStatus);
+
+                // Mostrar aba inicial
+                showTab("leitura");
+                elements.missionsContainer.style.display = "block";
+            } catch (e) {
+                console.error("Erro ao inicializar missões:", e);
+                showMessage("Erro ao carregar missões. Redirecionando...", false);
+                setTimeout(() => window.location.href = "./index.html", 2000);
+            }
+        });
+
+        // Mostrar aba
+        function showTab(tabId) {
+            try {
+                const tabs = document.querySelectorAll(".tab-content");
+                const buttons = document.querySelectorAll(".tab-btn");
+                tabs.forEach(tab => tab.classList.remove("active"));
+                buttons.forEach(btn => btn.classList.remove("active"));
+                const tabElement = document.getElementById(tabId);
+                const buttonElement = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+                if (tabElement && buttonElement) {
+                    tabElement.classList.add("active");
+                    buttonElement.classList.add("active");
+                }
+            } catch (e) {
+                console.error("Erro ao alternar aba:", e);
+                showMessage("Erro ao alternar aba.", false);
+            }
+        }
+
+        // Completar missão
+        function completeMission(skill, points, button) {
+            try {
+                const users = JSON.parse(localStorage.getItem("users"));
+                const user = users[localStorage.getItem("loggedUser")];
+                if (!user) {
+                    showMessage("Usuário não encontrado! Redirecionando...", false);
+                    setTimeout(() => window.location.href = "./index.html", 2000);
+                    return;
+                }
+
+                // Adicionar pontos à habilidade (sem limite)
+                user.profile.stats[skill] = (user.profile.stats[skill] || 1) + points;
+                localStorage.setItem("users", JSON.stringify(users));
+
+                // Mostrar mensagem de sucesso
+                showMessage(`Missão completada! +${points} em ${skill}!`, true);
+
+                // Criar efeito de partículas
+                createParticles(button);
+            } catch (e) {
+                console.error("Erro ao completar missão:", e);
+                showMessage("Erro ao completar missão.", false);
+            }
+        }
+
+        // Voltar para a tela de status
+        function goToStatus() {
+            try {
+                window.location.href = "./index.html";
+            } catch (e) {
+                console.error("Erro ao redirecionar:", e);
+                showMessage("Erro ao voltar para o status.", false);
+            }
+        }
+
+        // Mostrar mensagem de sucesso ou erro
+        function showMessage(text, isSuccess) {
+            elements.missionMessage.textContent = text;
+            elements.missionMessage.classList.toggle("success", isSuccess);
+            elements.missionMessage.classList.toggle("error", !isSuccess);
+            elements.missionMessage.style.display = "block";
+            setTimeout(() => {
+                elements.missionMessage.style.display = "none";
+            }, 2000);
+        }
+
+        // Criar efeito de partículas
+        function createParticles(button) {
+            const rect = button.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement("div");
+                particle.className = "particles";
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                const angle = Math.random() * 360;
+                const distance = 50 + Math.random() * 50;
+                particle.style.setProperty("--x", `${Math.cos(angle) * distance}px`);
+                particle.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
+                document.body.appendChild(particle);
+                particle.addEventListener("animationend", () => particle.remove());
+            }
+        }
+    </script>
+</body>
+</html>
